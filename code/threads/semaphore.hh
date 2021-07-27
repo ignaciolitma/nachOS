@@ -59,13 +59,15 @@ private:
 
     /// For debugging.
     const char *name;
-
+    int maxPriority;
     /// Semaphore value, it is always `>= 0`.
     int value;
 
     /// Queue of threads waiting on `P` because the value is zero.
     List<Thread *> *queue;
-
+    
+    
+    // List<(Thread*, int)> *oldThreadsPriority;
 };
 
 

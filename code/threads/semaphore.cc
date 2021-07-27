@@ -34,6 +34,7 @@ Semaphore::Semaphore(const char *debugName, int initialValue)
     name  = debugName;
     value = initialValue;
     queue = new List<Thread *>;
+    maxPriority = 0; // Inicializamos la mayor prioridad de un hilo
 }
 
 /// De-allocate semaphore, when no longer needed.
@@ -42,6 +43,12 @@ Semaphore::Semaphore(const char *debugName, int initialValue)
 Semaphore::~Semaphore()
 {
     delete queue;
+    /*
+
+        for (thread, oldPriority) in oldThreadsPriority :
+            thread->SetPriority(oldPriority);
+
+    */
 }
 
 const char *
@@ -64,7 +71,19 @@ Semaphore::P()
       // Disable interrupts.
 
     while (value == 0) {  // Semaphore not available.
+
         queue->Append(currentThread);  // So go to sleep.
+        /*
+        
+        maxPriority = max(maxPriority, currentThread->GetPriority());
+        if(currentThread not in oldThreadsPriority)
+        {
+            oldThreadsPriority.Add((currentThread, currentThread->GetPriority()); Usar diccionario para guardar (Clave, Valor)
+        }
+
+        currentThread->SetPiority(maxPriority);
+
+        */
         currentThread->Sleep();
     }
     value--;  // Semaphore available, consume its value.
