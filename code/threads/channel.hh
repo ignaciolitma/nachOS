@@ -21,7 +21,7 @@ public:
 private:
 
   /// For debugging.
-  const char *name;
+  char *name;
 
   int *buffer;
         
