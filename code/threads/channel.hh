@@ -22,7 +22,7 @@ private:
 
   /// For debugging.
   char *name;
-
+  bool isBufferEmpty;
   int *buffer;
         
   Lock *lock;
@@ -31,6 +31,7 @@ private:
   Condition *msgReceived;
   Condition *done;
   
+
 };
 
 #endif

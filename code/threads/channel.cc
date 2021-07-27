@@ -6,7 +6,8 @@ Channel::Channel(const char *debugName)
 {
     name = new char [strlen(debugName) + 1];
     strcpy(name, debugName);
-    buffer = nullptr;
+    buffer = (int*)malloc(sizeof(int));
+    isBufferEmpty = true;
     lock = new Lock(name);
     msgSent = new Condition(name, lock);
     msgReceived = new Condition(name, lock);
@@ -33,21 +34,22 @@ Channel::Send(int message)
 {   
     lock->Acquire();
 
-    while (buffer != nullptr){
+    while (!isBufferEmpty){
         DEBUG('c', "Esperando que se vacie el buffer\n");        
         done->Wait();
     }
 
     DEBUG('c', "Se vacio el buffer\n");  
-    buffer = (int*)malloc(sizeof(int));
+    
     *buffer = message;
+    isBufferEmpty = false;
 
     DEBUG('c', "Se envio un mensaje\n");        
     msgSent->Signal();
 
     DEBUG('c', "Esperando que le llegue el mensaje\n");        
     msgReceived->Wait();
-    DEBUG('c', "Dou llego el mensaje\n");        
+    DEBUG('c', "Llego el mensaje\n");        
 
     lock->Release();
 }
@@ -57,17 +59,16 @@ Channel::Receive(int *message)
 {   
     lock->Acquire();
 
-    while(buffer == nullptr)
+    while(isBufferEmpty)
     {
         DEBUG('c', "Esperando que haya algo en el buffer\n");        
         msgSent->Wait();
     }
 
-    DEBUG('c', "FIUMBA se vacio el buffer\n");        
+    DEBUG('c', "Se vacio el buffer\n");        
     DEBUG('c', "Llego el mensaje\n");        
     *message = *buffer;
-    free(buffer);
-    buffer = nullptr;
+    isBufferEmpty = true;
 
     DEBUG('c', "Avisamos que nos llego el mensaje\n");        
     msgReceived->Signal();

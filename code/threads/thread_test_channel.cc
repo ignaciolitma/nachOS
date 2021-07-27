@@ -4,8 +4,8 @@
 #include "system.hh"
 #include <stdio.h>
 
-static const unsigned CANT_SENDERS = 3;
-static const unsigned CANT_RECEIVERS = 3;
+static const unsigned CANT_SENDERS = 10;
+static const unsigned CANT_RECEIVERS = 10;
 static bool done[CANT_SENDERS + CANT_RECEIVERS];
 
 static Channel *channel = new Channel("Canal de comunic");
