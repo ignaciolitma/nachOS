@@ -67,7 +67,12 @@ private:
     List<Thread *> *queue;
     
     
-    // List<(Thread*, int)> *oldThreadsPriority;
+    // 2 lists that are pairwise related. We save in the nth position the thread/old priority
+    // They are used to temporally store each thread priority to restore when the semaphore is destroyed
+    List<Thread *> *dependentTheads;
+    List<int> *dependentTheadsOldPriorities;
+
+    void ManageDependencyInversion(Thread thread);
 };
 
 

@@ -34,6 +34,8 @@ Semaphore::Semaphore(const char *debugName, int initialValue)
     name  = debugName;
     value = initialValue;
     queue = new List<Thread *>;
+    dependentTheads = new List<Thread *>;
+    dependentTheadsOldPriorities = new List<int>;
     maxPriority = 0; // Inicializamos la mayor prioridad de un hilo
 }
 
@@ -43,12 +45,20 @@ Semaphore::Semaphore(const char *debugName, int initialValue)
 Semaphore::~Semaphore()
 {
     delete queue;
-    /*
 
-        for (thread, oldPriority) in oldThreadsPriority :
-            thread->SetPriority(oldPriority);
+    // We revert the priorities to their original values
+    while (!dependentTheads->IsEmpty() && !dependentTheadsOldPriorities->IsEmpty()) {
+        Thread * thread = dependentTheads->Pop();
+        int priority = dependentTheadsOldPriorities->Pop();
 
-    */
+        thread->SetPriority(priority);
+    }
+
+    // A sanity check that the lengths must be equal
+    ASSERT(dependentTheads->IsEmpty() && dependentTheadsOldPriorities->IsEmpty())
+
+    delete dependentTheads;
+    delete dependentTheadsOldPriorities;
 }
 
 const char *
@@ -73,17 +83,7 @@ Semaphore::P()
     while (value == 0) {  // Semaphore not available.
 
         queue->Append(currentThread);  // So go to sleep.
-        /*
-        
-        maxPriority = max(maxPriority, currentThread->GetPriority());
-        if(currentThread not in oldThreadsPriority)
-        {
-            oldThreadsPriority.Add((currentThread, currentThread->GetPriority()); Usar diccionario para guardar (Clave, Valor)
-        }
 
-        currentThread->SetPiority(maxPriority);
-
-        */
         currentThread->Sleep();
     }
     value--;  // Semaphore available, consume its value.
@@ -109,4 +109,20 @@ Semaphore::V()
     value++;
 
     interrupt->SetLevel(oldLevel);
+}
+
+void 
+Semaphore::ManageDependencyInversion(Thread * thread) 
+{
+    // Keep track of the highest priority 
+    int threadPriority = currentThread->GetPriority();
+    if (threadPriority < maxPriority) 
+        maxPriority = threadPriority
+    
+    if (!dependentTheads.Has(thread)) {
+        dependentTheads->Append(thread)
+        dependentTheadsOldPriorities->Append(currentThreadPriority)
+    }
+
+    thread->SetPriority(maxPriority)
 }
