@@ -119,10 +119,12 @@ Semaphore::ManageDependencyInversion(Thread * thread)
     if (threadPriority < maxPriority) 
         maxPriority = threadPriority
     
+    // Save the old priority if we haven't already
     if (!dependentTheads.Has(thread)) {
         dependentTheads->Append(thread)
         dependentTheadsOldPriorities->Append(currentThreadPriority)
     }
 
+    // Keep all threads dependent on this semaphore at the maximum priority above them
     thread->SetPriority(maxPriority)
 }
