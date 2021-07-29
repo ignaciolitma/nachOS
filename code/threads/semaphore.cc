@@ -55,7 +55,7 @@ Semaphore::~Semaphore()
     }
 
     // A sanity check that the lengths must be equal
-    ASSERT(dependentTheads->IsEmpty() && dependentTheadsOldPriorities->IsEmpty())
+    ASSERT(dependentTheads->IsEmpty() && dependentTheadsOldPriorities->IsEmpty());
 
     delete dependentTheads;
     delete dependentTheadsOldPriorities;
@@ -76,14 +76,13 @@ Semaphore::GetName() const
 /// called.
 void
 Semaphore::P()
-{
+{   
+    ManageDependencyInversion(currentThread);
     IntStatus oldLevel = interrupt->SetLevel(INT_OFF);
       // Disable interrupts.
 
     while (value == 0) {  // Semaphore not available.
-
         queue->Append(currentThread);  // So go to sleep.
-
         currentThread->Sleep();
     }
     value--;  // Semaphore available, consume its value.
@@ -99,6 +98,7 @@ Semaphore::P()
 void
 Semaphore::V()
 {
+    ManageDependencyInversion(currentThread);
     IntStatus oldLevel = interrupt->SetLevel(INT_OFF);
 
     Thread *thread = queue->Pop();
@@ -115,16 +115,19 @@ void
 Semaphore::ManageDependencyInversion(Thread * thread) 
 {
     // Keep track of the highest priority 
-    int threadPriority = currentThread->GetPriority();
-    if (threadPriority < maxPriority) 
-        maxPriority = threadPriority
+    int threadPriority = thread->GetPriority();
+    if (threadPriority > maxPriority) 
+        maxPriority = threadPriority;
     
     // Save the old priority if we haven't already
-    if (!dependentTheads.Has(thread)) {
-        dependentTheads->Append(thread)
-        dependentTheadsOldPriorities->Append(currentThreadPriority)
+    if (!dependentTheads->Has(thread)) {
+        dependentTheads->Append(thread);
+        dependentTheadsOldPriorities->Append(threadPriority);
     }
 
     // Keep all threads dependent on this semaphore at the maximum priority above them
-    thread->SetPriority(maxPriority)
+    
+    thread->SetPriority(maxPriority);
+
+    //TODO: Aplicar a todos los elementos de la lista.
 }

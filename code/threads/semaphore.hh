@@ -72,7 +72,7 @@ private:
     List<Thread *> *dependentTheads;
     List<int> *dependentTheadsOldPriorities;
 
-    void ManageDependencyInversion(Thread thread);
+    void ManageDependencyInversion(Thread *thread);
 };
 
 
