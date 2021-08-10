@@ -133,6 +133,8 @@ Close:
         j       $31
         .end    Close
 
+        .globl  Print
+        .ent    Print
 Print:
         addiu   $2, $0, SC_PRINT
         syscall
